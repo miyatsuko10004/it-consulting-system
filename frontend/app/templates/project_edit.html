@@ -1,21 +1,21 @@
 {% extends "layout.html" %}
 
-{% block title %}新規プロジェクト{% endblock %}
+{% block title %}プロジェクト編集{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">新規プロジェクト作成</h2>
-    <form action="/projects" method="post">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">プロジェクト編集</h2>
+    <form action="/projects/{{ project.id }}/edit" method="post">
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="name">プロジェクト名</label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="name" type="text" required>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="name" type="text" value="{{ project.name }}" required>
         </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="customer_id">顧客</label>
             <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="customer_id" name="customer_id">
                 {% for customer in customers %}
-                <option value="{{ customer.id }}">{{ customer.name }}</option>
+                <option value="{{ customer.id }}" {% if customer.id == project.customer_id %}selected{% endif %}>{{ customer.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -25,30 +25,30 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="status">ステータス</label>
                 <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="status" name="status">
                     {% for status in statuses %}
-                    <option value="{{ status.value }}">{{ status.value }}</option>
+                    <option value="{{ status.value }}" {% if status.value == project.status %}selected{% endif %}>{{ status.value }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="contract_amount">契約金額 (円)</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="contract_amount" name="contract_amount" type="number" required>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="contract_amount" name="contract_amount" type="number" value="{{ project.contract_amount }}" required>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="start_date">開始日</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="start_date" name="start_date" type="date" required>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="start_date" name="start_date" type="date" value="{{ project.start_date }}" required>
             </div>
             <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="end_date">終了日</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="end_date" name="end_date" type="date" required>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="end_date" name="end_date" type="date" value="{{ project.end_date }}" required>
             </div>
         </div>
 
         <div class="flex items-center justify-between">
             <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                プロジェクト作成
+                更新する
             </button>
             <a href="/" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
                 キャンセル

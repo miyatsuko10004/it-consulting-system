@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 
-{% block title %}Resources{% endblock %}
+{% block title %}リソース管理{% endblock %}
 
 {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold text-gray-700">Resource Heatmap (6 Months)</h2>
+    <h2 class="text-2xl font-bold text-gray-700">稼働状況ヒートマップ (6ヶ月)</h2>
     <form action="/employees" method="get" class="flex space-x-2">
         <input type="text" name="q" value="{{ request.query_params.get('q', '') }}" 
-               placeholder="Search by Name, Skill, Industry..." 
+               placeholder="氏名、スキル、業界で検索..." 
                class="shadow border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-64">
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Search
+            検索
         </button>
         {% if request.query_params.get('q') %}
-        <a href="/employees" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Clear</a>
+        <a href="/employees" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">クリア</a>
         {% endif %}
     </form>
 </div>
@@ -22,8 +22,8 @@
     <table class="min-w-full table-auto border-collapse">
         <thead>
             <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                <th class="py-3 px-6 text-left sticky left-0 bg-gray-200 z-10">Employee</th>
-                <th class="py-3 px-6 text-left">Role & Skills</th>
+                <th class="py-3 px-6 text-left sticky left-0 bg-gray-200 z-10">社員名</th>
+                <th class="py-3 px-6 text-left">役職 & スキル</th>
                 {% for header in month_headers %}
                 <th class="py-3 px-2 text-center min-w-[80px]">{{ header }}</th>
                 {% endfor %}

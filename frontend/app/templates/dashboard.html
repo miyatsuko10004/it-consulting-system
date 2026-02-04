@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
-{% block title %}Projects{% endblock %}
+{% block title %}プロジェクト一覧{% endblock %}
 
 {% block content %}
 <div class="mb-6 flex justify-between items-center">
-    <h2 class="text-2xl font-bold text-gray-700">Project Management</h2>
+    <h2 class="text-2xl font-bold text-gray-700">プロジェクト管理</h2>
     <a href="/projects/new" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        + New Project
+        + 新規プロジェクト作成
     </a>
 </div>
 
@@ -14,12 +14,12 @@
     <table class="min-w-full table-auto">
         <thead>
             <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                <th class="py-3 px-6 text-left">Project Name</th>
-                <th class="py-3 px-6 text-left">Customer</th>
-                <th class="py-3 px-6 text-center">Status</th>
-                <th class="py-3 px-6 text-center">Period</th>
-                <th class="py-3 px-6 text-right">Amount (JPY)</th>
-                <th class="py-3 px-6 text-center">Actions</th>
+                <th class="py-3 px-6 text-left">プロジェクト名</th>
+                <th class="py-3 px-6 text-left">顧客名</th>
+                <th class="py-3 px-6 text-center">ステータス</th>
+                <th class="py-3 px-6 text-center">期間</th>
+                <th class="py-3 px-6 text-right">契約金額 (円)</th>
+                <th class="py-3 px-6 text-center">操作</th>
             </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
@@ -33,9 +33,9 @@
                 </td>
                 <td class="py-3 px-6 text-center">
                     {% if project.status == 'Lead' %}
-                        <span class="bg-gray-200 text-gray-600 py-1 px-3 rounded-full text-xs">Lead</span>
+                        <span class="bg-gray-200 text-gray-600 py-1 px-3 rounded-full text-xs">リード</span>
                     {% elif project.status == 'Contracted' %}
-                        <span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Contracted</span>
+                        <span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">契約済</span>
                     {% else %}
                         <span class="bg-blue-200 text-blue-600 py-1 px-3 rounded-full text-xs">{{ project.status }}</span>
                     {% endif %}
@@ -48,11 +48,11 @@
                 </td>
                 <td class="py-3 px-6 text-center">
                     <div class="flex item-center justify-center">
-                        <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 cursor-pointer">
+                        <a href="/projects/{{ project.id }}/edit" class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 cursor-pointer" title="編集">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
-                        </div>
+                        </a>
                     </div>
                 </td>
             </tr>

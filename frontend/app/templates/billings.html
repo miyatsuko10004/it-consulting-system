@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}請求管理{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <h2 class="text-2xl font-bold text-gray-700">請求一覧</h2>
+    <!-- Future: Add 'New Invoice' button -->
+</div>
+
+<div class="bg-white shadow-md rounded my-6 overflow-x-auto">
+    <table class="min-w-full table-auto">
+        <thead>
+            <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                <th class="py-3 px-6 text-left">プロジェクト</th>
+                <th class="py-3 px-6 text-center">請求月</th>
+                <th class="py-3 px-6 text-right">金額 (円)</th>
+                <th class="py-3 px-6 text-center">ステータス</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm font-light">
+            {% for billing in billings %}
+            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                <td class="py-3 px-6 text-left whitespace-nowrap">
+                    <span class="font-medium">{{ billing.project_name }}</span>
+                </td>
+                <td class="py-3 px-6 text-center">
+                    {{ billing.billing_date }}
+                </td>
+                <td class="py-3 px-6 text-right">
+                    ¥{{ "{:,}".format(billing.amount) }}
+                </td>
+                <td class="py-3 px-6 text-center">
+                    <span class="bg-gray-200 text-gray-600 py-1 px-3 rounded-full text-xs">{{ billing.status }}</span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="py-4 text-center text-gray-500">請求データがありません</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -39,3 +39,12 @@ class Project(ProjectCreate):
     assignments: List[Assignment] = []
     class Config:
         from_attributes = True
+
+class Billing(BaseModel):
+    id: int
+    project_id: int
+    billing_date: date
+    amount: int
+    status: str
+    class Config:
+        from_attributes = True

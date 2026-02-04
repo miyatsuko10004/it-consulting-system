@@ -33,3 +33,13 @@ class Allocation(Base):
     effort_percent = Column(Integer)
 
     assignment = relationship("Assignment", back_populates="allocations")
+
+class Billing(Base):
+    __tablename__ = "billings"
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    billing_date = Column(Date)
+    amount = Column(Integer)
+    status = Column(String)
+
+    project = relationship("Project")

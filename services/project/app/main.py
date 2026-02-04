@@ -16,6 +16,27 @@ def create_project(proj: schemas.ProjectCreate, db: Session = Depends(get_db)):
     db.refresh(new_proj)
     return new_proj
 
+@app.get("/projects/{project_id}", response_model=schemas.Project)
+def read_project(project_id: int, db: Session = Depends(get_db)):
+    proj = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return proj
+
+@app.put("/projects/{project_id}", response_model=schemas.Project)
+def update_project(project_id: int, proj: schemas.ProjectCreate, db: Session = Depends(get_db)):
+    db_proj = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not db_proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Update fields
+    for key, value in proj.dict().items():
+        setattr(db_proj, key, value)
+    
+    db.commit()
+    db.refresh(db_proj)
+    return db_proj
+
 @app.post("/projects/{project_id}/assignments", response_model=schemas.Assignment, status_code=201)
 def create_assignment(project_id: int, assign: schemas.AssignmentCreate, db: Session = Depends(get_db)):
     # Verify Project Exists
@@ -59,3 +80,7 @@ def get_allocations(start_month: str = None, end_month: str = None, db: Session 
 @app.get("/assignments", response_model=List[schemas.Assignment])
 def get_assignments(db: Session = Depends(get_db)):
     return db.query(models.Assignment).all()
+
+@app.get("/billings", response_model=List[schemas.Billing])
+def get_billings(db: Session = Depends(get_db)):
+    return db.query(models.Billing).all()
