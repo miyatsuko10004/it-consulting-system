@@ -46,3 +46,16 @@ def create_assignment(project_id: int, assign: schemas.AssignmentCreate, db: Ses
     db.commit()
     db.refresh(new_assign)
     return new_assign
+
+@app.get("/allocations", response_model=List[schemas.Allocation])
+def get_allocations(start_month: str = None, end_month: str = None, db: Session = Depends(get_db)):
+    query = db.query(models.Allocation)
+    if start_month:
+        query = query.filter(models.Allocation.month >= start_month)
+    if end_month:
+        query = query.filter(models.Allocation.month <= end_month)
+    return query.all()
+
+@app.get("/assignments", response_model=List[schemas.Assignment])
+def get_assignments(db: Session = Depends(get_db)):
+    return db.query(models.Assignment).all()
