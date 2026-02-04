@@ -32,6 +32,10 @@ async def dashboard(request: Request):
             
     return templates.TemplateResponse("dashboard.html", {"request": request, "projects": projects})
 
+from calendar import monthrange
+
+# ... imports ...
+
 @app.get("/employees", response_class=HTMLResponse)
 async def employee_list(request: Request, q: str = None):
     async with httpx.AsyncClient() as client:
@@ -40,42 +44,70 @@ async def employee_list(request: Request, q: str = None):
         employees = resp.json() if resp.status_code == 200 else []
         
         today = date.today()
-        start_month = today.strftime("%Y-%m")
+        # approx 6 months end
         end_date = today + timedelta(days=180) 
-        end_month = end_date.strftime("%Y-%m")
         
         try:
-            alloc_resp = await client.get(f"{PROJECT_SERVICE_URL}/allocations", params={"start_month": start_month, "end_month": end_month})
+            # Fetch daily allocations
+            alloc_resp = await client.get(f"{PROJECT_SERVICE_URL}/allocations", params={"start_date": today.isoformat(), "end_date": str(end_date)})
             allocations = alloc_resp.json() if alloc_resp.status_code == 200 else []
             
             assign_resp = await client.get(f"{PROJECT_SERVICE_URL}/assignments")
             assignments = assign_resp.json() if assign_resp.status_code == 200 else []
             assign_map = {a['id']: a['employee_id'] for a in assignments}
             
-            heatmap_map = {}
+            # Heatmap Aggregation (Daily to Monthly Average)
+            heatmap_map = {} # {emp_id: { "2026-04": 75, ... }}
+            
+            # Helper to generate month keys for the next 6 months
+            target_months = []
+            curr = today.replace(day=1)
+            for _ in range(6):
+                _, last_day = monthrange(curr.year, curr.month)
+                target_months.append({
+                    "key": curr.strftime("%Y-%m"),
+                    "year": curr.year,
+                    "month": curr.month,
+                    "days": last_day,
+                    "start": curr,
+                    "end": curr.replace(day=last_day)
+                })
+                if curr.month == 12:
+                    curr = curr.replace(year=curr.year+1, month=1)
+                else:
+                    curr = curr.replace(month=curr.month+1)
+
             for alloc in allocations:
                 emp_id = assign_map.get(alloc['assignment_id'])
                 if not emp_id: continue
                 if emp_id not in heatmap_map: heatmap_map[emp_id] = {}
-                current_val = heatmap_map[emp_id].get(alloc['month'], 0)
-                heatmap_map[emp_id][alloc['month']] = current_val + alloc['effort_percent']
-        except:
+                
+                alloc_start = date.fromisoformat(alloc['start_date'])
+                alloc_end = date.fromisoformat(alloc['end_date'])
+                
+                for tm in target_months:
+                    # Calculate overlap days
+                    overlap_start = max(alloc_start, tm["start"])
+                    overlap_end = min(alloc_end, tm["end"])
+                    
+                    if overlap_start <= overlap_end:
+                        overlap_days = (overlap_end - overlap_start).days + 1
+                        monthly_contribution = (overlap_days / tm["days"]) * alloc['effort_percent']
+                        
+                        heatmap_map[emp_id][tm["key"]] = heatmap_map[emp_id].get(tm["key"], 0) + monthly_contribution
+                        
+        except Exception as e:
+            print(f"Error calculating heatmap: {e}")
             heatmap_map = {}
+            target_months = [] # Fallback
 
-        month_headers = []
-        curr = today.replace(day=1)
-        for _ in range(6):
-            month_headers.append(curr.strftime("%Y-%m"))
-            if curr.month == 12:
-                curr = curr.replace(year=curr.year+1, month=1)
-            else:
-                curr = curr.replace(month=curr.month+1)
+        month_headers = [m["key"] for m in target_months] if target_months else []
 
         for emp in employees:
             emp_map = heatmap_map.get(emp['id'], {})
             emp['heatmap'] = []
             for m in month_headers:
-                percent = emp_map.get(m, 0)
+                percent = round(emp_map.get(m, 0)) # Round to nearest integer
                 emp['heatmap'].append({"label": m, "percent": percent})
 
     return templates.TemplateResponse("employees.html", {

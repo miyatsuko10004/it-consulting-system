@@ -44,12 +44,20 @@ def create_assignment(project_id: int, assign: schemas.AssignmentCreate, db: Ses
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found")
 
+    # Determine overall start/end date from allocations
+    if not assign.allocations:
+        raise HTTPException(status_code=400, detail="Allocations required")
+    
+    dates = [a.start_date for a in assign.allocations] + [a.end_date for a in assign.allocations]
+    min_date = min(dates)
+    max_date = max(dates)
+
     # Create Assignment
     new_assign = models.Assignment(
         project_id=project_id,
         employee_id=assign.employee_id,
-        start_date=assign.start_date,
-        end_date=assign.end_date
+        start_date=min_date,
+        end_date=max_date
     )
     db.add(new_assign)
     db.commit()
@@ -59,7 +67,8 @@ def create_assignment(project_id: int, assign: schemas.AssignmentCreate, db: Ses
     for alloc in assign.allocations:
         new_alloc = models.Allocation(
             assignment_id=new_assign.id,
-            month=alloc.month,
+            start_date=alloc.start_date,
+            end_date=alloc.end_date,
             effort_percent=alloc.effort_percent
         )
         db.add(new_alloc)
@@ -69,12 +78,12 @@ def create_assignment(project_id: int, assign: schemas.AssignmentCreate, db: Ses
     return new_assign
 
 @app.get("/allocations", response_model=List[schemas.Allocation])
-def get_allocations(start_month: str = None, end_month: str = None, db: Session = Depends(get_db)):
+def get_allocations(start_date: str = None, end_date: str = None, db: Session = Depends(get_db)):
     query = db.query(models.Allocation)
-    if start_month:
-        query = query.filter(models.Allocation.month >= start_month)
-    if end_month:
-        query = query.filter(models.Allocation.month <= end_month)
+    if start_date:
+        query = query.filter(models.Allocation.end_date >= start_date) # Overlap check
+    if end_date:
+        query = query.filter(models.Allocation.start_date <= end_date) # Overlap check
     return query.all()
 
 @app.get("/assignments", response_model=List[schemas.Assignment])

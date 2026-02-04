@@ -29,7 +29,8 @@ class Allocation(Base):
     __tablename__ = "allocations"
     id = Column(Integer, primary_key=True, index=True)
     assignment_id = Column(Integer, ForeignKey("assignments.id"))
-    month = Column(String) # YYYY-MM
+    start_date = Column(Date)
+    end_date = Column(Date)
     effort_percent = Column(Integer)
 
     assignment = relationship("Assignment", back_populates="allocations")

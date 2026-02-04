@@ -33,36 +33,34 @@ def override_get_db(db_session):
     app.dependency_overrides.clear()
 
 @pytest.mark.asyncio
-async def test_create_project_with_monthly_allocation(override_get_db):
+async def test_create_project_with_daily_allocation(override_get_db):
     from httpx import ASGITransport
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         # 1. Create Project
         proj_payload = {
-            "name": "AI Consulting",
-            "contract_amount": 10000000,
+            "name": "Daily Resource Project",
+            "contract_amount": 5000000,
             "start_date": "2026-04-01",
-            "end_date": "2026-06-30",
+            "end_date": "2026-04-30",
             "customer_id": 1
         }
         resp_proj = await ac.post("/projects/", json=proj_payload)
         assert resp_proj.status_code == 201
         proj_id = resp_proj.json()["id"]
 
-        # 2. Assign Member with Allocations
+        # 2. Assign Member with Allocations (Period based)
         assign_payload = {
             "employee_id": 1,
-            "start_date": "2026-04-01",
-            "end_date": "2026-06-30",
             "allocations": [
-                {"month": "2026-04", "effort_percent": 50},
-                {"month": "2026-05", "effort_percent": 100},
-                {"month": "2026-06", "effort_percent": 80}
+                {"start_date": "2026-04-01", "end_date": "2026-04-15", "effort_percent": 50},
+                {"start_date": "2026-04-16", "end_date": "2026-04-30", "effort_percent": 100}
             ]
         }
         resp_assign = await ac.post(f"/projects/{proj_id}/assignments", json=assign_payload)
         assert resp_assign.status_code == 201
         
         data = resp_assign.json()
-        assert len(data["allocations"]) == 3
+        assert len(data["allocations"]) == 2
+        assert data["allocations"][0]["effort_percent"] == 50
         assert data["allocations"][1]["effort_percent"] == 100

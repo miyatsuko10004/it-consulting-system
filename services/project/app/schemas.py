@@ -3,7 +3,8 @@ from pydantic import BaseModel
 from datetime import date
 
 class AllocationBase(BaseModel):
-    month: str
+    start_date: date
+    end_date: date
     effort_percent: int
 
 class Allocation(AllocationBase):
@@ -13,15 +14,14 @@ class Allocation(AllocationBase):
 
 class AssignmentCreate(BaseModel):
     employee_id: int
-    start_date: date
-    end_date: date
     allocations: List[AllocationBase]
 
 class Assignment(BaseModel):
     id: int
     employee_id: int
-    start_date: date
-    end_date: date
+    # Derived from allocations min/max if needed, or nullable
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     allocations: List[Allocation]
     class Config:
         from_attributes = True
