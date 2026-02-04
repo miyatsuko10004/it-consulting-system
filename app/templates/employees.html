@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Resources{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-gray-700">Resource Management</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for emp in employees %}
+    <div class="bg-white rounded shadow p-6 border-l-4 {% if emp.assignments %}border-green-500{% else %}border-gray-300{% endif %}">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">{{ emp.name }}</h3>
+                <p class="text-sm text-gray-500">{{ emp.role }}</p>
+                <p class="text-xs text-gray-400">{{ emp.email }}</p>
+            </div>
+            <div class="text-right">
+                {% if emp.assignments %}
+                <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
+                {% else %}
+                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Bench</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Assignments</h4>
+            <ul class="mt-2 space-y-2">
+                {% for assign in emp.assignments %}
+                <li class="text-sm">
+                    <span class="font-medium text-gray-700">{{ assign.project.name }}</span>
+                    <span class="text-xs text-gray-500 block">
+                        {{ assign.start_date }} - {{ assign.end_date }} ({{ assign.effort_percent }}%)
+                    </span>
+                </li>
+                {% else %}
+                <li class="text-sm text-gray-400 italic">No active assignments</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

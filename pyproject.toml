@@ -1,0 +1,14 @@
+[project]
+name = "it-consulting-erp"
+version = "0.1.0"
+description = "Mock ERP for IT Consulting Firm"
+authors = [{name = "Moltbot", email = "bot@example.com"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy",
+    "jinja2",
+    "python-multipart",
+    "faker"
+]
+requires-python = ">=3.11"
