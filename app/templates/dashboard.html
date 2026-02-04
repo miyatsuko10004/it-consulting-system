@@ -26,7 +26,7 @@
             {% for project in projects %}
             <tr class="border-b border-gray-200 hover:bg-gray-100">
                 <td class="py-3 px-6 text-left whitespace-nowrap">
-                    <span class="font-medium">{{ project.name }}</span>
+                    <a href="/projects/{{ project.id }}" class="font-medium text-blue-600 hover:text-blue-800">{{ project.name }}</a>
                 </td>
                 <td class="py-3 px-6 text-left">
                     {{ project.customer.name }}

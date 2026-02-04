@@ -50,6 +50,49 @@ def create_project(
     db.commit()
     return RedirectResponse(url="/", status_code=303)
 
+@app.get("/projects/{project_id}", response_class=HTMLResponse)
+def project_detail(request: Request, project_id: int, db: Session = Depends(get_db)):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        return RedirectResponse(url="/")
+        
+    # Calculate Costs
+    total_cost = 0
+    breakdown = []
+    
+    for assign in project.assignments:
+        # Approximate duration in months
+        days = (assign.end_date - assign.start_date).days
+        months = days / 30.0
+        
+        # Cost = Monthly Unit Cost * Months * Effort%
+        cost = int(assign.employee.unit_cost * months * (assign.effort_percent / 100.0))
+        total_cost += cost
+        
+        breakdown.append({
+            "name": assign.employee.name,
+            "role": assign.employee.role,
+            "effort": assign.effort_percent,
+            "cost": cost
+        })
+        
+    profit = project.contract_amount - total_cost
+    margin_percent = (profit / project.contract_amount * 100) if project.contract_amount > 0 else 0
+    
+    summary = {
+        "revenue": project.contract_amount,
+        "cost": total_cost,
+        "profit": profit,
+        "margin_percent": margin_percent,
+        "breakdown": breakdown
+    }
+
+    return templates.TemplateResponse("project_detail.html", {
+        "request": request, 
+        "project": project, 
+        "summary": summary
+    })
+
 from datetime import date, timedelta
 from calendar import monthrange
 

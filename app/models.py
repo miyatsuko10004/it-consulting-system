@@ -16,6 +16,7 @@ class Employee(Base):
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     role = Column(String) # Consultant, Manager, Partner, etc.
+    unit_cost = Column(Integer, default=800000) # Monthly standard cost
     
     assignments = relationship("ProjectAssignment", back_populates="employee")
 

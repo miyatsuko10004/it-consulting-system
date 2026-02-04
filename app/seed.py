@@ -21,13 +21,22 @@ def seed_data():
     db.commit()
 
     print("Seeding Employees...")
-    roles = ["Analyst", "Consultant", "Senior Consultant", "Manager", "Senior Manager", "Partner"]
+    roles = {
+        "Partner": 2000000,
+        "Senior Manager": 1600000,
+        "Manager": 1300000,
+        "Senior Consultant": 1000000,
+        "Consultant": 800000,
+        "Analyst": 600000
+    }
     employees = []
     for _ in range(50):
+        role_name = random.choice(list(roles.keys()))
         emp = Employee(
             name=fake.name(),
             email=fake.email(),
-            role=random.choice(roles)
+            role=role_name,
+            unit_cost=roles[role_name]
         )
         db.add(emp)
         employees.append(emp)
