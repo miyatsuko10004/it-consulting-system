@@ -50,8 +50,60 @@ def create_project(
     db.commit()
     return RedirectResponse(url="/", status_code=303)
 
+from datetime import date, timedelta
+from calendar import monthrange
+
+# ... (imports)
+
+def get_monthly_utilization(employee, start_date, months=6):
+    utilization = []
+    current_year = start_date.year
+    current_month = start_date.month
+
+    for _ in range(months):
+        month_start = date(current_year, current_month, 1)
+        _, last_day = monthrange(current_year, current_month)
+        month_end = date(current_year, current_month, last_day)
+        
+        total_effort = 0
+        for assign in employee.assignments:
+            # Check overlap
+            if assign.start_date <= month_end and assign.end_date >= month_start:
+                total_effort += assign.effort_percent
+        
+        utilization.append({
+            "year": current_year,
+            "month": current_month,
+            "label": f"{current_year}/{current_month:02d}",
+            "percent": total_effort
+        })
+
+        # Next month
+        if current_month == 12:
+            current_month = 1
+            current_year += 1
+        else:
+            current_month += 1
+            
+    return utilization
+
 # Employee List (Resource Management)
 @app.get("/employees", response_class=HTMLResponse)
 def employee_list(request: Request, db: Session = Depends(get_db)):
     employees = db.query(Employee).all()
-    return templates.TemplateResponse("employees.html", {"request": request, "employees": employees})
+    today = date.today()
+    
+    # Attach utilization data to each employee object (runtime only)
+    for emp in employees:
+        emp.heatmap = get_monthly_utilization(emp, today)
+        
+    # Get month headers from the first employee (or calculate fresh if list empty)
+    month_headers = []
+    if employees:
+        month_headers = [m["label"] for m in employees[0].heatmap]
+    
+    return templates.TemplateResponse("employees.html", {
+        "request": request, 
+        "employees": employees,
+        "month_headers": month_headers
+    })
